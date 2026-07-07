@@ -38,9 +38,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Setup SSH key
+        run: |
+          printf "%s\n" "${{ secrets.PROD_SERVER_KEY }}" > key.pem
+          chmod 600 key.pem
+
       - name: Deploy to Production Server
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_IP }} << 'EOF'
+          ssh -i key.pem -o StrictHostKeyChecking=no ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_IP }} << 'EOF'
             docker pull nandanlagad/my-node-app:v2
             docker stop my-node-app || true
             docker rm my-node-app || true
